@@ -14,10 +14,10 @@ def build_files_dict():
 
     for file in files:
         if file.endswith(".jpg") or file.endswith(".JPG"):
-            print("Processing: {}".format(file))
             f = open(file, "rb")
             tags = exifread.process_file(f)
             c_date = str(tags["EXIF DateTimeOriginal"])
+            pprint(tags)
             print(c_date)
             store_to_dict(file, c_date, date_to_filename_dict)
             f.close()
@@ -31,7 +31,7 @@ def build_files_dict():
 def store_to_dict(file, c_date, date_to_filename_dict):
     """ Store creation date and filename to dictionary
 
-        If creation date is duplicated, pad date by
+        If creation date is duplicated, extend date key str by
         adding an extra character to the end
     """
     # Unit test this
@@ -47,11 +47,16 @@ def rename_files(date_to_filename_dict, prefix):
         photo was created (taken)
     """
     # Unit test this
+    cwd = os.getcwd()
     sorted_keys_list = sorted(date_to_filename_dict.keys())
     for index, key in enumerate(sorted_keys_list):
+        old_filename = date_to_filename_dict[key]
         new_filename = generate_new_name(key, prefix, index)
-        print("Original: {} --> New: {}".format(date_to_filename_dict[key],
-                                                new_filename))
+        print("Renaming: {} --> {}".format(old_filename,
+                                           new_filename))
+        old_file_path = "{}/{}".format(cwd, old_filename)
+        new_file_path = "{}/{}".format(cwd, new_filename)
+        os.rename(old_file_path, new_file_path)
 
 
 def generate_new_name(date_str, prefix, index):
@@ -81,7 +86,10 @@ def main():
 
     date_to_filename_dict = build_files_dict()
 
-    print("Result:")
+    # Dev safety feature
+    return
+
+    print("Images in directory:")
     pprint(date_to_filename_dict)
 
     rename_files(date_to_filename_dict, filename_prefix)
